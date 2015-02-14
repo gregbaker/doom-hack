@@ -5,6 +5,9 @@ var WINDOW_WIDTH = 720,
     CELL_WIDTH = 100,
     CELL_HEIGHT = 200;
 
+var GOAL_X = MAZE_WIDTH - 1,
+    GOAL_Y = MAZE_HEIGHT - 1;
+
 var maze, game={};
 var renderer, scene, camera;
 
@@ -131,7 +134,11 @@ render = function () {
 };
 
 var floor_material = new THREE.MeshLambertMaterial({color: 0xCC0000});
-var wall_material = new THREE.MeshLambertMaterial({color: 0x00CC00});
+//var wall_material = new THREE.MeshLambertMaterial({color: 0x00CC00});
+var wall_material = new THREE.MeshLambertMaterial({
+  map: THREE.ImageUtils.loadTexture(wall_texture)
+});
+var goal_material = new THREE.MeshLambertMaterial({color: 0xCCBB00});
 
 var setup_three = function() {
   // basic scene setup
@@ -195,12 +202,19 @@ var draw_maze = function() {
       }
     }
   }
+  
+  // goal
+  var geom = new THREE.SphereGeometry(CELL_WIDTH/2, 16, 16);
+  var goal = new THREE.Mesh(geom, goal_material);
+  var pos = cell_pos(GOAL_X, GOAL_Y);
+  goal.position.set(pos[0], CELL_HEIGHT/2, pos[2] - CELL_WIDTH/2);
+  scene.add(goal);
 };
 
 var position_camera = function() {
   var pos = cell_pos(game.x, game.y);
   var look;
-  camera.position.set(pos[0], CELL_HEIGHT*1.5, pos[2] - CELL_WIDTH/2);
+  camera.position.set(pos[0], CELL_HEIGHT*0.5, pos[2] - CELL_WIDTH/2);
   if ( game.facing == 0 ) { // N
     look = cell_pos(game.x, game.y+1);
   } else if ( game.facing == 1 ) { // S
@@ -217,7 +231,15 @@ var init_game = function() {
   game.x = 0;
   game.y = 0;
   game.facing = 0;
+  game.won = false
   position_camera();
+};
+
+var check_goal = function() {
+  if (game.x == GOAL_X && game.y == GOAL_Y) {
+    game.won = True;
+    alert("Winner");
+  }
 };
 
 var handle_key = function(e) {
@@ -285,6 +307,7 @@ var handle_key = function(e) {
     }
   }
   position_camera();
+  check_goal();
 };
 
 var setup = function() {
