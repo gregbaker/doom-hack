@@ -126,7 +126,7 @@ var generate_maze = function() {
 
 render = function () {
   requestAnimationFrame(render);
-  camera.position.y += 1;
+  //camera.position.y += 1;
   renderer.render(scene, camera);
 };
 
@@ -136,8 +136,9 @@ var wall_material = new THREE.MeshLambertMaterial({color: 0x00CC00});
 var setup_three = function() {
   // basic scene setup
   scene = new THREE.Scene(); 
-  camera = new THREE.PerspectiveCamera( 75, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, CELL_WIDTH*MAZE_WIDTH*10);
-  renderer = new THREE.WebGLRenderer(); renderer.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+  camera = new THREE.PerspectiveCamera( 120, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, CELL_WIDTH*MAZE_WIDTH*10);
+  renderer = new THREE.WebGLRenderer({antialias: true}); 
+  renderer.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   document.body.appendChild( renderer.domElement );
   
   // lighting
@@ -199,13 +200,13 @@ var draw_maze = function() {
 var position_camera = function() {
   var pos = cell_pos(game.x, game.y);
   var look;
-  camera.position.set(pos[0], CELL_HEIGHT/2, pos[2] - CELL_WIDTH/2);
+  camera.position.set(pos[0], CELL_HEIGHT*1.5, pos[2] - CELL_WIDTH/2);
   if ( game.facing == 0 ) { // N
     look = cell_pos(game.x, game.y+1);
-  } else if ( game.facing == 1 ) { // E
-    look = cell_pos(game.x+1, game.y);
-  } else if ( game.facing == 2 ) { // S
+  } else if ( game.facing == 1 ) { // S
     look = cell_pos(game.x, game.y-1);
+  } else if ( game.facing == 2 ) { // E
+    look = cell_pos(game.x+1, game.y);
   } else if ( game.facing == 3 ) { // W
     look = cell_pos(game.x-1, game.y);
   }
@@ -220,30 +221,67 @@ var init_game = function() {
 };
 
 var handle_key = function(e) {
-  console.log(e.keyCode);
-  if ( e.keyCode == 39 ) { // rightarrow
-    game.facing = (game.facing + 1) % 4;
-  } else if ( e.keyCode == 37 ) { // leftarrow
-    game.facing = (game.facing - 1) % 4;
-  } else if ( e.keyCode == 38 ) { // uparrow
+  var cell = maze[game.x][game.y];
+  console.log(game, cell)
+  if ( e.key == 'Right' ) {
     if ( game.facing == 0 ) { // N
-      game.y += 1;
-    } else if ( game.facing == 1 ) { // E
-      game.x += 1;
-    } else if ( game.facing == 2 ) { // S
-      game.y -= 1;
+      game.facing = 2;
+    } else if ( game.facing == 1 ) { // S
+      game.facing = 3;
+    } else if ( game.facing == 2 ) { // E
+      game.facing = 1;
     } else if ( game.facing == 3 ) { // W
+      game.facing = 0;
+    }
+  } else if ( e.key == 'Left' ) {
+    if ( game.facing == 0 ) { // N
+      game.facing = 3;
+    } else if ( game.facing == 1 ) { // S
+      game.facing = 2;
+    } else if ( game.facing == 2 ) { // E
+      game.facing = 0;
+    } else if ( game.facing == 3 ) { // W
+      game.facing = 1;
+    }
+  } else if ( e.key == 'Up' ) {
+    if ( game.facing == 0 && !cell.walls[0] ) { // N
+      game.y += 1;
+    } else if ( game.facing == 1 && !cell.walls[1] ) { // S
+      game.y -= 1;
+    } else if ( game.facing == 2 && !cell.walls[2] ) { // E
+      game.x += 1;
+    } else if ( game.facing == 3 && !cell.walls[3] ) { // W
       game.x -= 1;
     }
-  } else if ( e.keyCode == 40 ) { // downarrow
-    if ( game.facing == 0 ) { // N
+  } else if ( e.key == 'Down' ) {
+    if ( game.facing == 0 && !cell.walls[1] ) { // N
       game.y -= 1;
-    } else if ( game.facing == 1 ) { // E
-      game.x -= 1;
-    } else if ( game.facing == 2 ) { // S
+    } else if ( game.facing == 1 && !cell.walls[2] ) { // S
       game.y += 1;
-    } else if ( game.facing == 3 ) { // W
+    } else if ( game.facing == 2 && !cell.walls[3] ) { // E
+      game.x -= 1;
+    } else if ( game.facing == 3 && !cell.walls[2] ) { // W
       game.x += 1;
+    }
+  } else if ( e.key == 'z' ) {
+    if ( game.facing == 0 && !cell.walls[3] ) { // N
+      game.x -= 1;
+    } else if ( game.facing == 1 && !cell.walls[2] ) { // S
+      game.x += 1;
+    } else if ( game.facing == 2 && !cell.walls[0] ) { // E
+      game.y += 1;
+    } else if ( game.facing == 3 && !cell.walls[1] ) { // W
+      game.y -= 1;
+    }
+  } else if ( e.key == 'x' ) {
+    if ( game.facing == 0 && !cell.walls[2] ) { // N
+      game.x += 1;
+    } else if ( game.facing == 1 && !cell.walls[3] ) { // S
+      game.x -= 1;
+    } else if ( game.facing == 2 && !cell.walls[1] ) { // E
+      game.y -= 1;
+    } else if ( game.facing == 3 && !cell.walls[0] ) { // W
+      game.y += 1;
     }
   }
   position_camera();
