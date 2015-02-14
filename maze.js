@@ -152,10 +152,14 @@ var setup_three = function() {
   document.body.appendChild( renderer.domElement );
   
   // lighting
-  var ambientLight = new THREE.AmbientLight( 0x404040 );
+  var ambientLight = new THREE.AmbientLight(0x202020);
   scene.add(ambientLight);
-  var pointLight = new THREE.PointLight( 0xFFFFFF );
-  pointLight.position.set(0, CELL_HEIGHT*10, CELL_WIDTH*MAZE_HEIGHT*2);
+  var pointLight = new THREE.PointLight(0xFFFFFF);
+  pointLight.position.set(0, CELL_HEIGHT*10, CELL_WIDTH*MAZE_HEIGHT*4);
+  scene.add(pointLight);
+
+  pointLight = new THREE.PointLight(0x999999);
+  pointLight.position.set(CELL_WIDTH*MAZE_WIDTH*3, CELL_HEIGHT*10, -CELL_WIDTH*MAZE_HEIGHT);
   scene.add(pointLight);
   
   // floor
@@ -239,15 +243,14 @@ var init_game = function() {
 };
 
 var check_goal = function() {
-  if (game.x == GOAL_X && game.y == GOAL_Y) {
-    game.won = True;
+  if (game.x == GOAL_X && game.y == GOAL_Y && !game.won) {
+    game.won = true;
     alert("Winner");
   }
 };
 
 var handle_key = function(e) {
   var cell = maze[game.x][game.y];
-  console.log(game, cell)
   if ( e.key == 'Right' ) {
     if ( game.facing == 0 ) { // N
       game.facing = 2;
