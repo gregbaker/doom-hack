@@ -3,16 +3,16 @@ var WINDOW_WIDTH = 720,
     MAZE_WIDTH = 5,
     MAZE_HEIGHT = 5,
     CELL_WIDTH = 100,
-    CELL_HEIGHT = 200
-    
+    CELL_HEIGHT = 200;
 
-var maze, paper;
+var maze, game={};
+var renderer, scene, camera;
 
-randint = function(min, max) { // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+var randint = function (min, max) { // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
   return Math.floor(Math.random() * (max - min)) + min;
-}
+};
 
-Cell = function (maze, x, y) {
+var Cell = function (maze, x, y) {
   // constructor for a cell object
   var c = new Object();
   // store some metadata about ourselves
@@ -72,7 +72,7 @@ Cell = function (maze, x, y) {
   return c;
 }
 
-generate_maze = function() {
+var generate_maze = function() {
   /* from psuedocode at http://www.mazeworks.com/mazegen/mazetut/ */
   var cell_stack = new Array();
   var total_cells = MAZE_WIDTH * MAZE_HEIGHT;
@@ -124,17 +124,16 @@ generate_maze = function() {
   return maze;
 };
 
-var renderer, scene, camera;
 render = function () {
   requestAnimationFrame(render);
-  //camera.position.z += -1;
+  camera.position.y += 1;
   renderer.render(scene, camera);
 };
 
 var floor_material = new THREE.MeshLambertMaterial({color: 0xCC0000});
 var wall_material = new THREE.MeshLambertMaterial({color: 0x00CC00});
 
-setup_three = function() {
+var setup_three = function() {
   // basic scene setup
   scene = new THREE.Scene(); 
   camera = new THREE.PerspectiveCamera( 75, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, CELL_WIDTH*MAZE_WIDTH*10);
@@ -160,17 +159,15 @@ setup_three = function() {
   cube.position.set(0, CELL_HEIGHT/2, 0)
   //scene.add( cube );
 
-  camera.position.set(0, CELL_HEIGHT/2, CELL_WIDTH);
   render();
-
 };
 
-cell_pos = function(x, y) {
+var cell_pos = function(x, y) {
   // 3d base position of maze cell x,y
   return [(x+0.5)*CELL_WIDTH - CELL_WIDTH*MAZE_WIDTH/2, CELL_HEIGHT/2, -y*CELL_WIDTH + CELL_WIDTH*MAZE_HEIGHT/2]
 }
 
-draw_wall = function(x, y, xoff, yoff, width, height) {
+var draw_wall = function(x, y, xoff, yoff, width, height) {
   var geom = new THREE.BoxGeometry(width, CELL_HEIGHT, height);
   var wall = new THREE.Mesh(geom, wall_material);
   var pos = cell_pos(x, y);
@@ -178,7 +175,7 @@ draw_wall = function(x, y, xoff, yoff, width, height) {
   scene.add(wall);
 }
 
-draw_maze = function(maze) {
+var draw_maze = function() {
   var cell;
   for( var i=0; i<MAZE_WIDTH; i++ ) {
     for( var j=0; j<MAZE_HEIGHT; j++ ) {
@@ -199,11 +196,65 @@ draw_maze = function(maze) {
   }
 };
 
+var position_camera = function() {
+  var pos = cell_pos(game.x, game.y);
+  var look;
+  camera.position.set(pos[0], CELL_HEIGHT/2, pos[2] - CELL_WIDTH/2);
+  if ( game.facing == 0 ) { // N
+    look = cell_pos(game.x, game.y+1);
+  } else if ( game.facing == 1 ) { // E
+    look = cell_pos(game.x+1, game.y);
+  } else if ( game.facing == 2 ) { // S
+    look = cell_pos(game.x, game.y-1);
+  } else if ( game.facing == 3 ) { // W
+    look = cell_pos(game.x-1, game.y);
+  }
+  camera.lookAt(new THREE.Vector3(look[0], look[1], look[2] - CELL_WIDTH/2));
+};
 
-setup = function() {
+var init_game = function() {
+  game.x = 0;
+  game.y = 0;
+  game.facing = 0;
+  position_camera();
+};
+
+var handle_key = function(e) {
+  console.log(e.keyCode);
+  if ( e.keyCode == 39 ) { // rightarrow
+    game.facing = (game.facing + 1) % 4;
+  } else if ( e.keyCode == 37 ) { // leftarrow
+    game.facing = (game.facing - 1) % 4;
+  } else if ( e.keyCode == 38 ) { // uparrow
+    if ( game.facing == 0 ) { // N
+      game.y += 1;
+    } else if ( game.facing == 1 ) { // E
+      game.x += 1;
+    } else if ( game.facing == 2 ) { // S
+      game.y -= 1;
+    } else if ( game.facing == 3 ) { // W
+      game.x -= 1;
+    }
+  } else if ( e.keyCode == 40 ) { // downarrow
+    if ( game.facing == 0 ) { // N
+      game.y -= 1;
+    } else if ( game.facing == 1 ) { // E
+      game.x -= 1;
+    } else if ( game.facing == 2 ) { // S
+      game.y += 1;
+    } else if ( game.facing == 3 ) { // W
+      game.x += 1;
+    }
+  }
+  position_camera();
+};
+
+var setup = function() {
   maze = generate_maze();
   setup_three();
-  draw_maze(maze);
+  draw_maze();
+  init_game();
+  $("body").keypress(handle_key);
 };
 
 jQuery(document).ready(setup);
