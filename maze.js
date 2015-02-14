@@ -1,6 +1,6 @@
 var WINDOW_WIDTH = 720,
     WINDOW_HEIGHT = 720,
-    MAZE_WIDTH = 4,
+    MAZE_WIDTH = 5,
     MAZE_HEIGHT = 5,
     CELL_WIDTH = 100,
     CELL_HEIGHT = 200
@@ -127,7 +127,7 @@ generate_maze = function() {
 var renderer, scene, camera;
 render = function () {
   requestAnimationFrame(render);
-  //camera.position.y += 1;
+  //camera.position.z += -1;
   renderer.render(scene, camera);
 };
 
@@ -137,7 +137,7 @@ var wall_material = new THREE.MeshLambertMaterial({color: 0x00CC00});
 setup_three = function() {
   // basic scene setup
   scene = new THREE.Scene(); 
-  camera = new THREE.PerspectiveCamera( 75, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 1000 );
+  camera = new THREE.PerspectiveCamera( 75, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, CELL_WIDTH*MAZE_WIDTH*10);
   renderer = new THREE.WebGLRenderer(); renderer.setSize(WINDOW_WIDTH, WINDOW_HEIGHT);
   document.body.appendChild( renderer.domElement );
   
@@ -145,35 +145,55 @@ setup_three = function() {
   var ambientLight = new THREE.AmbientLight( 0x404040 );
   scene.add(ambientLight);
   var pointLight = new THREE.PointLight( 0xFFFFFF );
-  pointLight.position.set(10, 150, 100);
+  pointLight.position.set(0, CELL_HEIGHT*10, CELL_WIDTH*MAZE_HEIGHT*2);
   scene.add(pointLight);
   
   // floor
   var geom = new THREE.BoxGeometry(CELL_WIDTH*MAZE_WIDTH, 1, CELL_WIDTH*MAZE_HEIGHT); 
   var ground = new THREE.Mesh( geom, floor_material );
+  ground.position.set(0, 0, 0);
   scene.add(ground);
-  
+
   // draw the maze
   var geometry = new THREE.BoxGeometry( CELL_WIDTH, CELL_HEIGHT, CELL_WIDTH ); 
   cube = new THREE.Mesh( geometry, wall_material );
   cube.position.set(0, CELL_HEIGHT/2, 0)
-  scene.add( cube );
+  //scene.add( cube );
 
-  camera.position.set(0, CELL_HEIGHT*2, CELL_WIDTH*8);
+  camera.position.set(0, CELL_HEIGHT/2, CELL_WIDTH);
   render();
 
 };
 
+cell_pos = function(x, y) {
+  // 3d base position of maze cell x,y
+  return [(x+0.5)*CELL_WIDTH - CELL_WIDTH*MAZE_WIDTH/2, CELL_HEIGHT/2, -y*CELL_WIDTH + CELL_WIDTH*MAZE_HEIGHT/2]
+}
+
+draw_wall = function(x, y, xoff, yoff, width, height) {
+  var geom = new THREE.BoxGeometry(width, CELL_HEIGHT, height);
+  var wall = new THREE.Mesh(geom, wall_material);
+  var pos = cell_pos(x, y);
+  wall.position.set(pos[0] + xoff, pos[1], pos[2] + yoff);
+  scene.add(wall);
+}
+
 draw_maze = function(maze) {
-  var cell, geom, wall;
+  var cell;
   for( var i=0; i<MAZE_WIDTH; i++ ) {
     for( var j=0; j<MAZE_HEIGHT; j++ ) {
       cell = maze[i][j];
       if ( cell.walls[0] ) { // N
-        geom = new THREE.BoxGeometry(CELL_WIDTH, CELL_HEIGHT, 1);
-        wall = new THREE.Mesh( geom, wall_material );
-        wall.position.set(i*CELL_WIDTH, CELL_HEIGHT/2, j*CELL_WIDTH);
-        scene.add(wall);
+        draw_wall(i, j, 0, -CELL_WIDTH, CELL_WIDTH, 1);
+      }
+      if ( cell.walls[1] ) { // S
+        draw_wall(i, j, 0, 0, CELL_WIDTH, 1);
+      }
+      if ( cell.walls[2] ) { // E
+        draw_wall(i, j, CELL_WIDTH/2, -CELL_WIDTH/2, 1, CELL_WIDTH);
+      }
+      if ( cell.walls[3] ) { // W
+        draw_wall(i, j, -CELL_WIDTH/2, -CELL_WIDTH/2, 1, CELL_WIDTH);
       }
     }
   }
