@@ -251,7 +251,7 @@ var check_goal = function() {
 
 var handle_key = function(e) {
   var cell = maze[game.x][game.y];
-  if ( e.key == 'Right' ) {
+  if ( e.keyCode == 39 ) { // right
     if ( game.facing == 0 ) { // N
       game.facing = 2;
     } else if ( game.facing == 1 ) { // S
@@ -261,7 +261,7 @@ var handle_key = function(e) {
     } else if ( game.facing == 3 ) { // W
       game.facing = 0;
     }
-  } else if ( e.key == 'Left' ) {
+  } else if ( e.keyCode == 37 ) { // left
     if ( game.facing == 0 ) { // N
       game.facing = 3;
     } else if ( game.facing == 1 ) { // S
@@ -271,7 +271,7 @@ var handle_key = function(e) {
     } else if ( game.facing == 3 ) { // W
       game.facing = 1;
     }
-  } else if ( e.key == 'Up' ) {
+  } else if ( e.keyCode == 38 ) { // up
     if ( game.facing == 0 && !cell.walls[0] ) { // N
       game.y += 1;
     } else if ( game.facing == 1 && !cell.walls[1] ) { // S
@@ -281,7 +281,7 @@ var handle_key = function(e) {
     } else if ( game.facing == 3 && !cell.walls[3] ) { // W
       game.x -= 1;
     }
-  } else if ( e.key == 'Down' ) {
+  } else if ( e.keyCode == 40 ) { // down
     if ( game.facing == 0 && !cell.walls[1] ) { // N
       game.y -= 1;
     } else if ( game.facing == 1 && !cell.walls[2] ) { // S
@@ -291,7 +291,7 @@ var handle_key = function(e) {
     } else if ( game.facing == 3 && !cell.walls[2] ) { // W
       game.x += 1;
     }
-  } else if ( e.key == 'z' ) {
+  } else if ( e.keyCode == 90 ) { // z
     if ( game.facing == 0 && !cell.walls[3] ) { // N
       game.x -= 1;
     } else if ( game.facing == 1 && !cell.walls[2] ) { // S
@@ -301,7 +301,7 @@ var handle_key = function(e) {
     } else if ( game.facing == 3 && !cell.walls[1] ) { // W
       game.y -= 1;
     }
-  } else if ( e.key == 'x' ) {
+  } else if ( e.keyCode == 88 ) { // x
     if ( game.facing == 0 && !cell.walls[2] ) { // N
       game.x += 1;
     } else if ( game.facing == 1 && !cell.walls[3] ) { // S
@@ -321,7 +321,7 @@ var setup = function() {
   setup_three();
   draw_maze();
   init_game();
-  $("body").keypress(handle_key);
+  $("body").keydown(handle_key);
 };
 
 jQuery(document).ready(setup);
