@@ -8,6 +8,16 @@ var WINDOW_WIDTH = 720,
 var GOAL_X = MAZE_WIDTH - 1,
     GOAL_Y = MAZE_HEIGHT - 1;
 
+var floor_material = new THREE.MeshLambertMaterial({
+  map: THREE.ImageUtils.loadTexture(floor_texture)
+});
+var wall_material = new THREE.MeshLambertMaterial({
+  map: THREE.ImageUtils.loadTexture(wall_texture)
+});
+var goal_material = new THREE.MeshLambertMaterial({
+  map: THREE.ImageUtils.loadTexture(goal_texture)
+});
+
 var maze, game={};
 var renderer, scene, camera;
 
@@ -132,13 +142,6 @@ render = function () {
   //camera.position.y += 1;
   renderer.render(scene, camera);
 };
-
-var floor_material = new THREE.MeshLambertMaterial({color: 0xCC0000});
-//var wall_material = new THREE.MeshLambertMaterial({color: 0x00CC00});
-var wall_material = new THREE.MeshLambertMaterial({
-  map: THREE.ImageUtils.loadTexture(wall_texture)
-});
-var goal_material = new THREE.MeshLambertMaterial({color: 0xCCBB00});
 
 var setup_three = function() {
   // basic scene setup

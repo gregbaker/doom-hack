@@ -8,6 +8,7 @@ def url_for(url):
     return '' + encoded
 
 print "var wall_texture = 'data:image/jpeg;base64,%s'" % (url_for('http://freeseamlesstextures.com/images/12-natural-stone-background-sml.jpg'))
-print "var floor_texture = 'data:image/jpeg;base64,%s'" % (url_for('http://freeseamlesstextures.com/images/41-black-asphalt-background-sml.jpg'))
+print "var floor_texture = 'data:image/jpeg;base64,%s'" % (url_for('http://freeseamlesstextures.com/images/41-black-asphalt-background-jpg.sml'))
+print "var goal_texture = 'data:image/jpeg;base64,%s'" % (url_for('http://freeseamlesstextures.com/images/34-gold-parchment-background-sml.jpg'))
 
 
